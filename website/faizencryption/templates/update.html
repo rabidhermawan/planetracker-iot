@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block page_title %}Update User{% endblock %}
+
+{% block content %}
+<h1>Update User</h1>
+<form action="#" method="POST">
+    {{ form.hidden_tag() }}
+
+    {{form.name.label(class="form-label")}}
+    {{form.name(class="form-control")}}
+    {% for error in form.name.errors %}
+        <span style="color: red;">{{ error }}</span><br>
+    {% endfor %}
+    
+    {{form.email.label(class="form-label")}}
+    {{form.email(class="form-control")}}
+    <br><br>
+    {% for error in form.email.errors %}
+        <span style="color: red;">{{ error }}</span><br>
+    {% endfor %}
+
+    {{form.submit(class="btn btn-primary")}}
+
+</form>
+{% endblock %}

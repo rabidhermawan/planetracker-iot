@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block page_title %}Index{% endblock %}
+
+{% block content %}
+<h1>Hello! This is the index!</h1>
+
+<div class="text-center">
+    {% if current_user.is_authenticated %}
+    {% for file in files %}
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title">{{file.name}}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">Encryption type : {{file.enc_type}}</h6>
+            <p class="card-text">Uploaded at : {{file.upload_date}}</p>
+            <a href="/download/{{ file.uuid }}" class="card-link">Download</a>
+            <a href="/share/{{ file.uuid }}" class="card-link">Share</a>
+            <a href="/remove/{{ file.uuid }}" class="card-link" style="color:red;">Remove</a>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+</div>
+    
+{% endblock %}
