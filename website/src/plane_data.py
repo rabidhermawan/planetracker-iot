@@ -1,6 +1,6 @@
 from config import MapBounds
 
-from src import app, db
+from src import app, db, socketio
 from src.models import PlaneData
 from datetime import datetime
 
@@ -52,10 +52,19 @@ def opensky_fetch_plane_data(area: str):
                 # Rollback changes of database
                 db.session.rollback()
                 print(f"DB ERROR: {e}")
-
+                return plane_data["states"]
+                
         print(f"{datetime.now()} | Successfully fetched and inserted {len(plane_data["states"])} plane data")
+        
+        return time_fetched, plane_data["states"]
 
     else:
         print(f"Failed to retrieve data, {response.status_code}")
+        return None, None
 
 
+def opensky_broadcast_plane_data(area: str):
+    time_fetched, plane_data = opensky_fetch_plane_data(area)
+    socketio.emit("latest_data", plane_data)
+    
+    return time_fetched, plane_data

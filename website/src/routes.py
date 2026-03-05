@@ -20,5 +20,10 @@ def map():
 
 @app.route('/test_fetch')
 def test_fetch_latest():
-    opensky_fetch_plane_data(SELECTED_MAP_BOUNDS)
-    return render_template('map.html', bounds=MapBounds[SELECTED_MAP_BOUNDS])
+    _, plane_data = opensky_fetch_plane_data(SELECTED_MAP_BOUNDS)
+    return render_template('map_loadjson.html', bounds=MapBounds[SELECTED_MAP_BOUNDS], plane_data=plane_data)
+
+@app.route('/test_broadcast')
+def test_broadcast():
+    #_, plane_data = opensky_fetch_broadcast_plane_data(SELECTED_MAP_BOUNDS)
+    return render_template('map_loadbroadcast.html', bounds=MapBounds[SELECTED_MAP_BOUNDS])
