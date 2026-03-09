@@ -1,6 +1,6 @@
 from config import MapBounds
 
-from src import app, db, socketio
+from src import app, db, socketio, redis_cache
 from src.models import PlaneData
 from datetime import datetime
 
@@ -16,10 +16,16 @@ def opensky_fetch_plane_data(area: str):
     # Boundary coordinates are defined in MapBounds
     request_url = f"{base_url}/states/all"
     response = requests.get(request_url, params=bound_data)
+    
 
     # Only handles 200 OK
     if response.status_code == 200:
         plane_data = response.json()
+
+        # Cache data for future use
+        redis_cache.hset("latest_plane_data", plane_data)
+        redis_cache.expire("latest_plane_data", 60)
+        
         time_fetched = plane_data["time"]
 
         print(f"{datetime.now()} | Inserting plane data in {area} area to database")
@@ -61,10 +67,3 @@ def opensky_fetch_plane_data(area: str):
     else:
         print(f"Failed to retrieve data, {response.status_code}")
         return None, None
-
-
-def opensky_broadcast_plane_data(area: str):
-    time_fetched, plane_data = opensky_fetch_plane_data(area)
-    socketio.emit("latest_data", plane_data)
-    
-    return time_fetched, plane_data

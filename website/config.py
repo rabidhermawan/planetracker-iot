@@ -11,7 +11,9 @@ class Config(object):
        
     
     SECRET_KEY = os.environ.get("SECRET_KEY") or 'you-will-never-guess'
-
+    
+    REDIS_HOST = os.environ.get("REDIS_HOST") or "localhost"
+    REDIS_PORT= os.environ.get("REDIS_PORT") or 6379
 # la : lattitude, lo : longitude
 MapBounds = {
         "SWISS": {

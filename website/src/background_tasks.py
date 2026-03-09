@@ -1,5 +1,6 @@
 from src import scheduler
-from src.plane_data import opensky_fetch_plane_data, opensky_broadcast_plane_data
+from src.plane_data import opensky_fetch_plane_data
+from src.socket import opensky_broadcast_plane_data
 from config import SELECTED_MAP_BOUNDS
 
 from datetime import datetime
