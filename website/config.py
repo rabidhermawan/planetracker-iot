@@ -32,3 +32,5 @@ MapBounds = {
         # [5.989, 100.11],
         # [3.620, 101.87],
         # [3.620, 100.11],
+
+SELECTED_MAP_BOUNDS: str = "SWISS"

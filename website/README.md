@@ -1,0 +1,48 @@
+# PLANETRACKER - IOT
+
+WORK IN PROGRESS  
+Web app that periodically fetches data from OpenSky API then display plane's location on an area and stores it on the database
+
+## Current features
+- Periodic plane data fetching from from OpenSky API
+- Interactive map with real-time plane location analyzing
+
+## Work In Progress
+- Docker support
+- View plane data detail and travel trail
+- Detailed analytics
+
+## How to run
+1. Create a Python virtual environment, then enter the virtual environment
+```shell
+python -m venv .venv
+
+# Linux
+source .venv/Scripts/activate
+
+# Windows
+./.venv/Scripts/Activate.ps1
+```
+
+2. Download the dependencies
+```shell
+pip install -r requirements.txt
+```
+
+2. Create the .flaskenv file from the provided .flaskenv.example, modify the env files as needed
+```shell
+cp .flaskenv.example .flaskenv
+```
+
+3. Run the application. Currently it requires that you disable auto-reload/running more than one instance due to how APScheduler works.
+```
+# 
+flask run --no-reload
+
+# For debugging
+flask --debug --no-reload
+```
+
+
+## Software architecture
+### WIP
