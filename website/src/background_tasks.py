@@ -1,7 +1,5 @@
-from src import scheduler
-from src.plane_data import opensky_fetch_plane_data
+from src import scheduler, Config
 from src.socket import opensky_broadcast_plane_data
-from config import SELECTED_MAP_BOUNDS
 
 from datetime import datetime
 
@@ -18,9 +16,8 @@ from datetime import datetime
 
 scheduler.add_job(
     func=opensky_broadcast_plane_data, 
-    kwargs={"area":SELECTED_MAP_BOUNDS},
     trigger="interval",
-    seconds=15,
+    seconds=Config.API_FETCH_INTERVAL,
     id="opsky_plane_broadcast"
   )
 

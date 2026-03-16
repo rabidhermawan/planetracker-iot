@@ -12,10 +12,25 @@ class Config(object):
     
     SECRET_KEY = os.environ.get("SECRET_KEY") or 'you-will-never-guess'
     
+    # REDIS
     REDIS_HOST = os.environ.get("REDIS_HOST") or "localhost"
-    REDIS_PORT= os.environ.get("REDIS_PORT") or 6379
-# la : lattitude, lo : longitude
-MapBounds = {
+    REDIS_PORT= int(os.environ.get("REDIS_PORT") or 6379)
+    
+    # API Settings
+    API_FETCH_INTERVAL = int(os.environ.get("API_FETCH_INTERVAL") or 60)
+    
+    # OPENSKY Module
+    OPENSKY_API_URL = os.environ.get("OPENSKY_API_URL") or "https://opensky-network.org/api"
+    OPENSKY_TOKEN_URL = os.environ.get("OPENSKY_TOKEN_URL") or "https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token"
+    OPENSKY_CLIENT_ID = os.environ.get("OPENSKY_CLIENT_ID") or "your_client_id"
+    OPENSKY_CLIENT_SECRET = os.environ.get("OPENSKY_CLIENT_SECRET") or "your_client_secret"
+    
+    # How many seconds before expiry to proactively refresh the token.
+    OPENSKY_TOKEN_REFRESH_MARGIN = int(os.environ.get("OPENSKY_TOKEN_REFRESH_MARGIN") or 30)
+    
+    SELECTED_MAP_BOUNDS = os.environ.get("SELECTED_MAP_BOUNDS") or "SWISS"
+    
+    MapBounds = {
         "SWISS": {
             "lamin": 45.8389,
             "lomin": 5.9962,
@@ -29,10 +44,12 @@ MapBounds = {
             "lomax": 101.87
         }
     }
+    
+# la : lattitude, lo : longitude
+
 
         # [5.989, 101.87],  //Kanan Atas
         # [5.989, 100.11],
         # [3.620, 101.87],
         # [3.620, 100.11],
 
-SELECTED_MAP_BOUNDS: str = "SWISS"

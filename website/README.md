@@ -13,6 +13,11 @@ Web app that periodically fetches data from OpenSky API then display plane's loc
 - Detailed analytics
 
 ## How to run
+0. Setup Redis for caching
+```bash
+docker run -p 6379:6379 my-valkey-bundle
+```
+
 1. Create a Python virtual environment, then enter the virtual environment
 ```shell
 python -m venv .venv
@@ -29,20 +34,24 @@ source .venv/Scripts/activate
 pip install -r requirements.txt
 ```
 
-2. Create the .flaskenv file from the provided .flaskenv.example, modify the env files as needed
+3. Create the .flaskenv file from the provided .flaskenv.example, modify the env files as needed
 ```shell
 cp .flaskenv.example .flaskenv
 ```
 
-3. Run the application. Currently it requires that you disable auto-reload/running more than one instance due to how APScheduler works.
+3a. **ONLY RUN THIS WHEN MIGRATING NEW DATA**. Run the command below to migrate the database
+```shell
+flask db init
+flask db migrate
 ```
-# 
+
+3. Run the application. Currently it requires that you disable auto-reload/running more than one instance due to how APScheduler works.
+```shell
 flask run --no-reload
 
 # For debugging
 flask --debug --no-reload
 ```
-
 
 ## Software architecture
 ### WIP

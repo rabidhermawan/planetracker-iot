@@ -1,8 +1,7 @@
 from flask import render_template
-from src import app
-from src.plane_data import opensky_fetch_plane_data
-
-from config import MapBounds, SELECTED_MAP_BOUNDS
+from src import app, token
+from src.opensky.helper import opensky_fetch_plane_data
+from config import Config
 
 @app.route('/')
 @app.route('/index')
@@ -20,10 +19,9 @@ def map():
 
 @app.route('/test_fetch')
 def test_fetch_latest():
-    _, plane_data = opensky_fetch_plane_data(SELECTED_MAP_BOUNDS)
-    return render_template('map_loadjson.html', bounds=MapBounds[SELECTED_MAP_BOUNDS], plane_data=plane_data)
+    _, plane_data = opensky_fetch_plane_data(Config.SELECTED_MAP_BOUNDS, token)
+    return render_template('map_loadjson.html', bounds=Config.MapBounds[Config.SELECTED_MAP_BOUNDS], plane_data=plane_data)
 
 @app.route('/test_broadcast')
 def test_broadcast():
-    #_, plane_data = opensky_fetch_broadcast_plane_data(SELECTED_MAP_BOUNDS)
-    return render_template('map_loadbroadcast.html', bounds=MapBounds[SELECTED_MAP_BOUNDS])
+    return render_template('map_loadbroadcast.html', bounds=Config.MapBounds[Config.SELECTED_MAP_BOUNDS])
