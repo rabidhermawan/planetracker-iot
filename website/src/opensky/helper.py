@@ -1,7 +1,7 @@
 import json
 
 from src import app, db, redis_cache
-from src.models import PlaneData
+from src.models import Plane, PlaneData
 from .token_manager import OpenSkyTokenManager
 
 from config import Config
@@ -29,14 +29,20 @@ def opensky_fetch_plane_data(area: str, token: OpenSkyTokenManager):
             time_fetched = plane_data["time"]
             print(f"{datetime.now()} | Inserting plane data in {area} area to database")
             
-            plane_data_db = []
-            
             for data in plane_data["states"]:
-                plane_db = PlaneData(
+                plane_db = db.session.query(Plane).filter_by(icao24=data[0]).first()
+                
+                if not plane_db :                
+                    plane_db = Plane(
+                        icao24=data[0],
+                        callsign=data[1],
+                        origin_country=data[2],
+                    )
+                    db.session.add(plane_db)
+                
+                plane_data_db = PlaneData(
                     time_fetched=time_fetched,
-                    icao24=data[0],
-                    callsign=data[1],
-                    origin_country=data[2],
+                    plane_icao24=data[0],
                     time_position=data[3],
                     last_contact=data[4],
                     longitude=data[5],
@@ -50,12 +56,13 @@ def opensky_fetch_plane_data(area: str, token: OpenSkyTokenManager):
                     geo_altitude=data[13],
                     squawk=data[14],
                     spi=data[15],
-                    position_source=data[16]
+                    position_source=data[16],
                 )
-                plane_data_db.append(plane_db)
+                
+                plane_db.plane_data.add(plane_data_db)
+                db.session.add(plane_data_db)
                 
             try:
-                db.session.add_all(plane_data_db)
                 db.session.commit()
             except Exception as e:
                 # Rollback changes of database
