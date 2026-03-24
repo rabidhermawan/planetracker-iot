@@ -52,9 +52,9 @@ def opensky_fetch_plane_data(area: str):
                 # Rollback changes of database
                 db.session.rollback()
                 print(f"DB ERROR: {e}")
-                return plane_data["states"]
+                return time_fetched, plane_data["states"]
                 
-        print(f"{datetime.now()} | Successfully fetched and inserted {len(plane_data["states"])} plane data")
+        print(f"{datetime.now()} | Successfully fetched and inserted {len(plane_data['states'])} plane data")
         
         return time_fetched, plane_data["states"]
 

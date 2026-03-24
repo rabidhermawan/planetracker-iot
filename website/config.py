@@ -15,7 +15,7 @@ class Config(object):
 # la : lattitude, lo : longitude
 MapBounds = {
         "SWISS": {
-            "lamin": 45.8389,
+            "lamin": 40.8389,
             "lomin": 5.9962,
             "lamax": 47.8229,
             "lomax": 10.5226
@@ -33,4 +33,4 @@ MapBounds = {
         # [3.620, 101.87],
         # [3.620, 100.11],
 
-SELECTED_MAP_BOUNDS: str = "SWISS"
+SELECTED_MAP_BOUNDS: str = "PERAK_PENANG"

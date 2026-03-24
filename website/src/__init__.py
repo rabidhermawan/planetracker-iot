@@ -14,8 +14,6 @@ migrate = Migrate(app, db)
 
 socketio = SocketIO(app)
 from src import socket
-socketio.run(app)
-
 scheduler = BackgroundScheduler()
 from src import background_tasks
 scheduler.start()

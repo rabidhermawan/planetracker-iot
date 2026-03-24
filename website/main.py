@@ -1,3 +1,4 @@
-from src import app
+from src import app, socketio
 
-# source /home/rabidh/code/iot-planetracker/website/.venv/bin/activate
+if __name__ == '__main__':
+    socketio.run(app, port=5001)

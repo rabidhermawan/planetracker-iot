@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - PlaneTracker IoT</title>
+    <!-- Load Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Load Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-primary: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.5);
+            --gradient-1: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            --gradient-2: linear-gradient(135deg, #064e3b 0%, #10b981 100%);
+            --gradient-3: linear-gradient(135deg, #4c1d95 0%, #8b5cf6 100%);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 2rem;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at top right, rgba(59, 130, 246, 0.15), transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(139, 92, 246, 0.15), transparent 40%);
+            background-attachment: fixed;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(96, 165, 250, 0.2);
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+        }
+
+        .kpi-card.blue::before { background: var(--gradient-1); }
+        .kpi-card.green::before { background: var(--gradient-2); }
+        .kpi-card.purple::before { background: var(--gradient-3); }
+
+        .kpi-title {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .kpi-unit {
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 0.25rem;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            height: 380px;
+            overflow: hidden;
+        }
+        
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #e2e8f0;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Pulse animation for live status */
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            margin-right: 8px;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <h2>Initializing Dashboard...</h2>
+    </div>
+
+    <div class="dashboard-container">
+        <h1>Aerospace Analytics</h1>
+        <p class="subtitle">Real-time planetary flight telemetry</p>
+        
+        <div class="live-indicator">
+            <div class="pulse-dot"></div>
+            LIVE DATA FEED
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card blue">
+                <div class="kpi-title">Active Planes</div>
+                <div class="kpi-value" id="valTotalPlanes">--</div>
+            </div>
+            <div class="kpi-card green">
+                <div class="kpi-title">Average Altitude</div>
+                <div class="kpi-value" id="valAvgAltitude">--<span class="kpi-unit">m</span></div>
+            </div>
+            <div class="kpi-card purple">
+                <div class="kpi-title">Average Velocity</div>
+                <div class="kpi-value" id="valAvgVelocity">--<span class="kpi-unit">m/s</span></div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-container">
+                <div class="chart-title">Fleet Distribution by Origin</div>
+                <div style="position: relative; height: 280px; width: 100%;">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">Flight Status Indicator</div>
+                <div style="position: relative; height: 280px; width: 100%; display: flex; justify-content: center; align-items: center;">
+                    <canvas id="doughnutChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set Chart.js global defaults for dark theme
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = "'Outfit', sans-serif";
+        Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 23, 42, 0.9)';
+        Chart.defaults.plugins.tooltip.titleColor = '#f8fafc';
+        Chart.defaults.plugins.tooltip.bodyColor = '#cbd5e1';
+        Chart.defaults.plugins.tooltip.padding = 12;
+        Chart.defaults.plugins.tooltip.cornerRadius = 8;
+        Chart.defaults.plugins.tooltip.displayColors = false;
+        
+        let barChartInstance = null;
+        let doughnutChartInstance = null;
+
+        async function fetchAnalytics() {
+            try {
+                const response = await fetch('/api/analytics');
+                const data = await response.json();
+                
+                // Update KPI Cards
+                document.getElementById('valTotalPlanes').innerText = data.total_planes;
+                document.getElementById('valAvgAltitude').innerHTML = data.avg_altitude + '<span class="kpi-unit">m</span>';
+                document.getElementById('valAvgVelocity').innerHTML = data.avg_velocity + '<span class="kpi-unit">m/s</span>';
+
+                // Prepare Bar Chart Data
+                const originLabels = data.top_countries.map(c => c.country || 'Unknown');
+                const originData = data.top_countries.map(c => c.count);
+
+                // Prepare Doughnut Chart Data
+                const statusData = [data.in_air, data.on_ground];
+
+                // Render or Update Bar Chart
+                const barCtx = document.getElementById('barChart').getContext('2d');
+                if (barChartInstance) {
+                    barChartInstance.data.labels = originLabels;
+                    barChartInstance.data.datasets[0].data = originData;
+                    barChartInstance.update();
+                } else {
+                    const gradientBar = barCtx.createLinearGradient(0, 0, 0, 400);
+                    gradientBar.addColorStop(0, 'rgba(59, 130, 246, 0.8)');
+                    gradientBar.addColorStop(1, 'rgba(139, 92, 246, 0.2)');
+
+                    barChartInstance = new Chart(barCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: originLabels,
+                            datasets: [{
+                                label: 'Number of Planes',
+                                data: originData,
+                                backgroundColor: gradientBar,
+                                borderColor: '#3b82f6',
+                                borderWidth: 1,
+                                borderRadius: 6,
+                                hoverBackgroundColor: '#60a5fa'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(255, 255, 255, 0.05)',
+                                        drawBorder: false
+                                    },
+                                    ticks: {
+                                        precision: 0
+                                    }
+                                },
+                                x: {
+                                    grid: { display: false }
+                                }
+                            },
+                            animation: {
+                                duration: 2000,
+                                easing: 'easeOutQuart'
+                            }
+                        }
+                    });
+                }
+
+                // Render or Update Doughnut Chart
+                const doughnutCtx = document.getElementById('doughnutChart').getContext('2d');
+                if (doughnutChartInstance) {
+                    doughnutChartInstance.data.datasets[0].data = statusData;
+                    doughnutChartInstance.update();
+                } else {
+                    doughnutChartInstance = new Chart(doughnutCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['In Air', 'On Ground'],
+                            datasets: [{
+                                data: statusData,
+                                backgroundColor: [
+                                    'rgba(16, 185, 129, 0.8)', // Green for In Air (active)
+                                    'rgba(245, 158, 11, 0.8)'  // Amber for On Ground
+                                ],
+                                borderColor: 'var(--bg-color)',
+                                borderWidth: 4,
+                                hoverOffset: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '70%',
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 20,
+                                        usePointStyle: true,
+                                        pointStyle: 'circle'
+                                    }
+                                }
+                            },
+                            animation: {
+                                animateScale: true,
+                                animateRotate: true,
+                                duration: 2000,
+                                easing: 'easeOutQuart'
+                            }
+                        }
+                    });
+                }
+
+                // Hide loading overlay on first successful fetch
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay.style.opacity !== '0') {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => {
+                        overlay.style.display = 'none';
+                    }, 500);
+                }
+
+            } catch (error) {
+                console.error("Failed to fetch analytics data:", error);
+            }
+        }
+
+        // Fetch immediately and then poll every 15 seconds (matching backend interval)
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchAnalytics();
+            setInterval(fetchAnalytics, 15000);
+        });
+    </script>
+</body>
+</html>
