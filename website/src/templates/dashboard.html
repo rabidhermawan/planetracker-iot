@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group RAR - Analytics Dashboard - PlaneTracker IoT</title>
+    <!-- Load Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Load Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Load Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --glass-bg: rgba(30, 41, 59, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-glow: rgba(59, 130, 246, 0.5);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            background-image:
+                radial-gradient(circle at 100% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 0% 100%, rgba(139, 92, 246, 0.15) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(96, 165, 250, 0.2);
+            font-weight: 700;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .kpi-value {
+            font-size: 2.75rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .kpi-unit {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .chart-container-inner {
+            position: relative;
+            height: 320px;
+            width: 100%;
+        }
+
+        /* Pulse animation for live status */
+        .live-indicator {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            padding: 0.35rem 1rem;
+            border-radius: 50rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            margin-right: 8px;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Icon container with gradients */
+        .icon-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .icon-blue {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(30, 58, 138, 0.2));
+            color: #60a5fa;
+        }
+
+        .icon-green {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 78, 59, 0.2));
+            color: #34d399;
+        }
+
+        .icon-purple {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(76, 29, 149, 0.2));
+            color: #a78bfa;
+        }
+    </style>
+</head>
+
+<body class="py-4">
+
+    <!-- Loading Screen -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <h3 class="fw-light text-white">Initializing Sensor Feed...</h3>
+    </div>
+
+    <div class="container-xl">
+        <!-- Header Section -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+            <div>
+                <h1 class="gradient-text display-5 mb-1">Group RAR - IoT Aerospace Analytics</h1>
+                <p class="text-secondary fs-5 mb-0">Real-time planetary flight telemetry © Group RAR (Rizqy Aabid Ali)
+                </p>
+            </div>
+            <div>
+                <div class="live-indicator">
+                    <div class="pulse-dot"></div>
+                    <span class="letter-spacing-1 text-uppercase">Live Data Feed</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards Row -->
+        <div class="row g-4 mb-5">
+            <!-- Total Planes -->
+            <div class="col-md-4">
+                <div class="card glass-card h-100 overflow-hidden border-0">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h6 class="text-uppercase tracking-wider text-secondary fw-semibold mb-0 mt-2">Active Planes
+                            </h6>
+                            <div class="icon-circle icon-blue">
+                                <i class="bi bi-airplane-fill"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-value d-flex align-items-baseline gap-1" id="valTotalPlanes">--</div>
+                    </div>
+                    <div class="progress" style="height: 4px; background: rgba(255,255,255,0.05);">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Average Altitude -->
+            <div class="col-md-4">
+                <div class="card glass-card h-100 overflow-hidden border-0">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h6 class="text-uppercase tracking-wider text-secondary fw-semibold mb-0 mt-2">Avg Altitude
+                            </h6>
+                            <div class="icon-circle icon-green">
+                                <i class="bi bi-clouds-fill"></i>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-baseline gap-1">
+                            <div class="kpi-value" id="valAvgAltitude">--</div>
+                            <span class="kpi-unit">m</span>
+                        </div>
+                    </div>
+                    <div class="progress" style="height: 4px; background: rgba(255,255,255,0.05);">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Average Velocity -->
+            <div class="col-md-4">
+                <div class="card glass-card h-100 overflow-hidden border-0">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h6 class="text-uppercase tracking-wider text-secondary fw-semibold mb-0 mt-2">Avg Velocity
+                            </h6>
+                            <div class="icon-circle icon-purple">
+                                <i class="bi bi-speedometer2"></i>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-baseline gap-1">
+                            <div class="kpi-value" id="valAvgVelocity">--</div>
+                            <span class="kpi-unit">m/s</span>
+                        </div>
+                    </div>
+                    <div class="progress" style="height: 4px; background: rgba(255,255,255,0.05);">
+                        <div class="progress-bar style=background-color: #8b5cf6;" role="progressbar"
+                            style="width: 100%; background-color: #8b5cf6;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row g-4">
+            <!-- Bar Chart -->
+            <div class="col-lg-8">
+                <div class="card glass-card border-0 h-100">
+                    <div class="card-body p-4">
+                        <h4 class="card-title fw-semibold mb-4 text-white">Fleet Distribution by Origin</h4>
+                        <div class="chart-container-inner">
+                            <canvas id="barChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Doughnut Chart -->
+            <div class="col-lg-4">
+                <div class="card glass-card border-0 h-100">
+                    <div class="card-body p-4">
+                        <h4 class="card-title fw-semibold mb-4 text-white">Flight Status</h4>
+                        <div class="chart-container-inner d-flex justify-content-center align-items-center">
+                            <canvas id="doughnutChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Plotting Logic -->
+    <script>
+        // Chart.js global defaults for sleek UI
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = "'Outfit', sans-serif";
+        Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 23, 42, 0.9)';
+        Chart.defaults.plugins.tooltip.titleColor = '#f8fafc';
+        Chart.defaults.plugins.tooltip.bodyColor = '#cbd5e1';
+        Chart.defaults.plugins.tooltip.padding = 12;
+        Chart.defaults.plugins.tooltip.cornerRadius = 8;
+        Chart.defaults.plugins.tooltip.displayColors = false;
+
+        let barChartInstance = null;
+        let doughnutChartInstance = null;
+
+        async function fetchAnalytics() {
+            try {
+                const response = await fetch('/api/analytics');
+                const data = await response.json();
+
+                // Animate Numbers
+                animateValue('valTotalPlanes', parseInt(document.getElementById('valTotalPlanes').innerText) || 0, data.total_planes, 1000);
+                animateValue('valAvgAltitude', parseFloat(document.getElementById('valAvgAltitude').innerText) || 0, data.avg_altitude, 1000);
+                animateValue('valAvgVelocity', parseFloat(document.getElementById('valAvgVelocity').innerText) || 0, data.avg_velocity, 1000);
+
+                // Prepare Chart Data
+                const originLabels = data.top_countries.map(c => c.country || 'Unknown');
+                const originData = data.top_countries.map(c => c.count);
+                const statusData = [data.in_air, data.on_ground];
+
+                // Render Bar Chart
+                const barCtx = document.getElementById('barChart').getContext('2d');
+                if (barChartInstance) {
+                    barChartInstance.data.labels = originLabels;
+                    barChartInstance.data.datasets[0].data = originData;
+                    barChartInstance.update();
+                } else {
+                    const gradientBar = barCtx.createLinearGradient(0, 0, 0, 400);
+                    gradientBar.addColorStop(0, 'rgba(59, 130, 246, 0.7)');
+                    gradientBar.addColorStop(1, 'rgba(139, 92, 246, 0.1)');
+
+                    barChartInstance = new Chart(barCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: originLabels,
+                            datasets: [{
+                                label: 'Number of Planes',
+                                data: originData,
+                                backgroundColor: gradientBar,
+                                borderColor: '#3b82f6',
+                                borderWidth: 1,
+                                borderRadius: 6,
+                                hoverBackgroundColor: '#60a5fa'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false }
+                                },
+                                x: { grid: { display: false } }
+                            },
+                            animation: { duration: 1500, easing: 'easeOutQuart' }
+                        }
+                    });
+                }
+
+                // Render Doughnut Chart
+                const doughnutCtx = document.getElementById('doughnutChart').getContext('2d');
+                if (doughnutChartInstance) {
+                    doughnutChartInstance.data.datasets[0].data = statusData;
+                    doughnutChartInstance.update();
+                } else {
+                    doughnutChartInstance = new Chart(doughnutCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['In Air', 'On Ground'],
+                            datasets: [{
+                                data: statusData,
+                                backgroundColor: ['#10b981', '#f59e0b'],
+                                borderColor: '#0b0f19',
+                                borderWidth: 4,
+                                hoverOffset: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '75%',
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: { padding: 20, usePointStyle: true, pointStyle: 'circle' }
+                                }
+                            },
+                            animation: { duration: 1500, easing: 'easeOutQuart' }
+                        }
+                    });
+                }
+
+                // Hide loading overlay on first successful fetch
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay.style.opacity !== '0') {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => overlay.style.display = 'none', 500);
+                }
+
+            } catch (error) {
+                console.error("Failed to fetch analytics data:", error);
+            }
+        }
+
+        // Simple number counter animation
+        function animateValue(id, start, end, duration) {
+            const obj = document.getElementById(id);
+            if (start === end) {
+                obj.innerHTML = end;
+                return;
+            }
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                // Ease out functionality for smoother finish
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                let current = start + (end - start) * easeOut;
+
+                // formatting 
+                if (end % 1 !== 0) obj.innerHTML = current.toFixed(2);
+                else obj.innerHTML = Math.floor(current);
+
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    obj.innerHTML = end;
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // Bootstrap tooltips initialization
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
+        // Fetch immediately and then poll every 15 seconds
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchAnalytics();
+            setInterval(fetchAnalytics, 15000);
+        });
+    </script>
+</body>
+
+</html>

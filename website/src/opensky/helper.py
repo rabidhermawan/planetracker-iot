@@ -22,9 +22,12 @@ def opensky_fetch_plane_data(area: str, token: OpenSkyTokenManager):
         # Only handles 200 OK
         if response.status_code == 200:
             plane_data = response.json()
-            # Cache data for future use. BROKEN I THINK????
-            redis_cache.json().set("latest_plane_data", "$" ,plane_data["states"])
-            redis_cache.expire("latest_plane_data", Config.API_FETCH_INTERVAL)
+            # Cache data for future use. Wrapped in try-except to prevent crashes if Redis is dead
+            try:
+                redis_cache.json().set("latest_plane_data", "$" ,plane_data["states"])
+                redis_cache.expire("latest_plane_data", Config.API_FETCH_INTERVAL)
+            except Exception as e:
+                print(f"Redis cache warning: {e}")
             
             time_fetched = plane_data["time"]
             print(f"{datetime.now()} | Inserting plane data in {area} area to database")

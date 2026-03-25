@@ -33,6 +33,8 @@ class OpenSkyTokenManager:
 
     def headers(self):
         """Return request headers with a valid Bearer token."""
+        if not Config.OPENSKY_CLIENT_ID or Config.OPENSKY_CLIENT_ID == "your_client_id":
+            return {}
         return {"Authorization": f"Bearer {self.get_token()}"}
 
     # Using OpenSky REST API

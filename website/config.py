@@ -1,6 +1,9 @@
 import os
-# Refer to the executed file for base directory
+from dotenv import load_dotenv
+
 basedir = os.path.abspath(os.path.dirname(__file__))
+env_path = os.path.join(basedir, '.env')
+load_dotenv(env_path, override=True)
 
 class Config(object):
     DEBUG = False
@@ -42,6 +45,12 @@ class Config(object):
             "lomin": 100.11,
             "lamax": 5.989,
             "lomax": 101.87
+        },
+        "LONDON": {
+            "lamin": 51.0,
+            "lomin": -1.0,
+            "lamax": 52.5,
+            "lomax": 1.5
         }
     }
     
