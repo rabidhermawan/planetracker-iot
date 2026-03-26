@@ -6,16 +6,13 @@ Web app that periodically fetches data from OpenSky API then display plane's loc
 ## Current features
 - Periodic plane data fetching from from OpenSky API
 - Interactive map with real-time plane location analyzing
-
-## Work In Progress
-- Docker support
-- View plane data detail and travel trail
 - Detailed analytics
 
 ## How to run
-0. Setup Redis for caching
+0. Setup Redis for caching and (optionally) Postgre Database
 ```bash
-docker run -p 6379:6379 my-valkey-bundle
+docker run -p 6379:6379 -d --name valkey-0 valkey/valkey-bundle
+docker run -p 5432:5432 -d --name postgres-0 -e POSTGRES_PASSWORD=12345 postgres
 ```
 
 1. Create a Python virtual environment, then enter the virtual environment
@@ -23,10 +20,10 @@ docker run -p 6379:6379 my-valkey-bundle
 python -m venv .venv
 
 # Linux
-source .venv/Scripts/activate
+source .venv/bin/activate
 
 # Windows
-./.venv/Scripts/Activate.ps1
+./.venv/bin/Activate.ps1
 ```
 
 2. Download the dependencies
