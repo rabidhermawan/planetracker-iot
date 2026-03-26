@@ -48,7 +48,7 @@ def analytics():
             base_query = PlaneData.query.filter(PlaneData.time_fetched >= start_datetime, PlaneData.time_fetched <= end_datetime)
             
             # Aggregate metrics over the period
-            total_planes = base_query.with_entities(func.count(func.distinct(PlaneData.plane_icao24))).scalar() or 0
+            total_planes = base_query.with_entities(func.count(func.distinct(PlaneData.plane_id))).scalar() or 0
             
             avg_stats = db.session.query(
                 func.avg(PlaneData.velocity).label('avg_velocity'),
@@ -61,7 +61,7 @@ def analytics():
             # Top countries
             top_countries_query = db.session.query(
                 Plane.origin_country, 
-                func.count(func.distinct(PlaneData.plane_icao24)).label('count')
+                func.count(func.distinct(PlaneData.plane_id)).label('count')
             ).select_from(PlaneData)\
              .join(Plane)\
              .filter(PlaneData.time_fetched >= start_datetime, PlaneData.time_fetched <= end_datetime)\

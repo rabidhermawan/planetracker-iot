@@ -41,8 +41,7 @@ cp .flaskenv.example .flaskenv
 
 3a. **ONLY RUN THIS WHEN MIGRATING NEW DATA**. Run the command below to migrate the database
 ```shell
-flask db init
-flask db migrate
+flask db upgrade
 ```
 
 3. Run the application. Currently it requires that you disable auto-reload/running more than one instance due to how APScheduler works.

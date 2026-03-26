@@ -36,7 +36,7 @@ class Plane(db.Model):
 class PlaneData(db.Model):
   id: so.Mapped[int] = so.mapped_column(primary_key=True)
   
-  plane_icao24: so.Mapped[str] = so.mapped_column(sa.ForeignKey("plane.icao24"))
+  plane_id: so.Mapped[str] = so.mapped_column(sa.ForeignKey("plane.id"))
   
   time_fetched: so.Mapped[datetime] = so.mapped_column(sa.DateTime, index=True)
   
