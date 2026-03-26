@@ -26,8 +26,8 @@ def test_fetch_latest():
     _, plane_data = opensky_fetch_plane_data(Config.SELECTED_MAP_BOUNDS, token)
     return render_template('map_loadjson.html', bounds=Config.MapBounds[Config.SELECTED_MAP_BOUNDS], plane_data=plane_data)
 
-@app.route('/test_broadcast')
-def test_broadcast():
+@app.route('/live_map')
+def live_map():
     return render_template('map_loadbroadcast.html', bounds=Config.MapBounds[Config.SELECTED_MAP_BOUNDS])
 
 @app.route('/dashboard')
