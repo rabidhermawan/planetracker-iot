@@ -14,12 +14,12 @@ from datetime import datetime
 #     id="opsky_plane_fetch"
 #   )
 
-scheduler.add_job(
-    func=opensky_broadcast_plane_data, 
-    trigger="interval",
-    seconds=Config.API_FETCH_INTERVAL,
-    id="opsky_plane_broadcast"
-  )
+# scheduler.add_job(
+#     func=opensky_broadcast_plane_data, 
+#     trigger="interval",
+#     seconds=Config.API_FETCH_INTERVAL,
+#     id="opsky_plane_broadcast"
+#   )
 
 # scheduler.add_job(
 #     func=print_smth, 
