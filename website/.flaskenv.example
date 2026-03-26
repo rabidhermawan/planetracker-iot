@@ -1,0 +1,22 @@
+FLASK_APP=main.py
+
+SQLALCHEMY_DATABASE_URI= 
+SECRET_KEY= 'farewell-my-beloved-one'
+    
+# REDIS
+REDIS_HOST="localhost"
+REDIS_PORT=6379
+
+# API Settings
+API_FETCH_INTERVAL =30
+
+# OPENSKY Module
+OPENSKY_API_URL="https://opensky-network.org/api"
+OPENSKY_TOKEN_URL="https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token"
+OPENSKY_CLIENT_ID=
+OPENSKY_CLIENT_SECRET=
+
+# How many seconds before expiry to proactively refresh the token.
+OPENSKY_TOKEN_REFRESH_MARGIN=30
+
+SELECTED_MAP_BOUNDS="PERAK_PENANG"
