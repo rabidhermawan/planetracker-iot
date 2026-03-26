@@ -1,8 +1,8 @@
-"""init database structure
+"""empty message
 
-Revision ID: b44dc9679726
+Revision ID: 35d630e708d9
 Revises: 
-Create Date: 2026-03-26 16:54:58.808940
+Create Date: 2026-03-18 00:39:50.055295
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'b44dc9679726'
+revision = '35d630e708d9'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -27,14 +27,14 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     with op.batch_alter_table('plane', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('ix_plane_callsign'), ['callsign'], unique=False)
+        batch_op.create_index(batch_op.f('ix_plane_callsign'), ['callsign'], unique=True)
         batch_op.create_index(batch_op.f('ix_plane_created_at'), ['created_at'], unique=False)
         batch_op.create_index(batch_op.f('ix_plane_icao24'), ['icao24'], unique=True)
         batch_op.create_index(batch_op.f('ix_plane_origin_country'), ['origin_country'], unique=False)
 
     op.create_table('plane_data',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('plane_icao24', sa.String(length=10), nullable=False),
+    sa.Column('plane_id', sa.Integer(), nullable=False),
     sa.Column('time_fetched', sa.DateTime(), nullable=False),
     sa.Column('time_position', sa.DateTime(), nullable=True),
     sa.Column('last_contact', sa.DateTime(), nullable=False),
@@ -50,7 +50,7 @@ def upgrade():
     sa.Column('squawk', sa.String(length=100), nullable=True),
     sa.Column('spi', sa.Boolean(), nullable=False),
     sa.Column('position_source', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['plane_icao24'], ['plane.icao24'], ),
+    sa.ForeignKeyConstraint(['plane_id'], ['plane.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     with op.batch_alter_table('plane_data', schema=None) as batch_op:
