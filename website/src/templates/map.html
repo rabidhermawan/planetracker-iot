@@ -16,6 +16,9 @@
      crossorigin="">
 
   </script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+  <link rel="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" href="style.css">
+  <link rel="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" href="style.css">
 
   <style>
     #map { min-height: 100vh; }
@@ -28,8 +31,11 @@
 </html>
 
 <script>
+    function getRandomArbitrary(min, max) {
+      return Math.random() * (max - min) + min;
+    }
     // Set map view
-    let map = L.map('map', {zoomControl: false, dragging: false}).setView([4.80568, 100.990448], 9);
+    let map = L.map('map', {}).setView([4.80568, 100.990448], 9);
     // map.dragging.disable()
     // map.maxZoom.disable()
 
@@ -41,6 +47,12 @@
 
     // Add popup
     var popup = L.popup();
+    var layerControl = L.control.layers().addTo(map);
+
+    var crownHill = L.marker([5, 100]).bindPopup('This is Crown Hill Park.'),
+    rubyHill = L.marker([5.5, 100]).bindPopup('This is Ruby Hill Park.');
+    
+    var parks = L.layerGroup([crownHill, rubyHill]);
 
     function onMapClick(e) {
       popup
@@ -52,14 +64,40 @@
     map.on('click', onMapClick);
 
     // Add polygon - Currently defined within Perak & Penak
-    let polygon = L.polygon([
-        [5.989, 101.87],  //Kanan Atas
-        [3.620, 101.87],
-        [3.620, 100.11],
-        [5.989, 100.11],
+    // let apolygon = L.polygon([
+    //     [5.989, 101.87],  //Kanan Atas
+    //     [3.620, 101.87],
+    //     [3.620, 100.11],
+    //     [5.989, 100.11],
         
         
-    ]).addTo(map);
+    // ]).addTo(map);
+    let groupsies = L.markerClusterGroup({showCoverageOnHover: false}).addTo(map);
+    let coverages = new L.LayerGroup();
+    // ... Add more layers ...
+    
+    groupsies.on("animationend", function() {
+  // Here getting clusters randomly, but you can decide which one you want to show coverage of.
+      coverages.clearLayers();
+
+      groupsies._featureGroup.eachLayer(function(layer) {
+        if (layer instanceof L.MarkerCluster && layer.getChildCount() > 2) {
+          //mcg._showCoverage({ layer: layer });
+          coverages.addLayer(L.polygon(layer.getConvexHull()));
+        }
+        coverages.addTo(map);
+      });
+    });
+
+    for (let i = 0; i < 50; ++i) {
+      m = L.marker([getRandomArbitrary(3.620, 5.989), getRandomArbitrary(100.11, 101.87)]).addTo(map);
+      groupsies.addLayer(m)
+    }
+
+    groupsies.fire("animationend");
+    // marker = L.marker([51.5, -0.09]).addTo(map);
+    
+    // map.addLayer(markers);
 
 </script>
 

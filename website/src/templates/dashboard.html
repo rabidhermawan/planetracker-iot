@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet" />
+
 {% endblock %}
 
 {% block body %}
@@ -28,18 +29,13 @@
                 <p class="text-secondary fs-5 mb-0">Real-time planetary flight telemetry © Group RAR (Rizqy Aabid Ali)
                 </p>
             </div>
-            <div class="d-flex align-items-center gap-2">
-                <span class="text-secondary small">From</span>
-                <input type="date" id="startDateFilter" class="form-control form-control-sm bg-transparent text-secondary border-secondary" style="max-width: 130px; color-scheme: dark;" title="Start date">
-                <span class="text-secondary small">To</span>
-                <input type="date" id="endDateFilter" class="form-control form-control-sm bg-transparent text-secondary border-secondary" style="max-width: 130px; color-scheme: dark;" title="End date">
-                <div class="live-indicator ms-2" id="liveIndicator">
-                    <div class="pulse-dot" id="pulseDot"></div>
-                        <span class="letter-spacing-1 text-uppercase" id="indicatorText" style="font-size: 0.8rem;">Live Data</span>
+            <div>
+                <div class="live-indicator">
+                    <div class="pulse-dot"></div>
+                    <span class="letter-spacing-1 text-uppercase">Live Data Feed</span>
                 </div>
             </div>
-    </div>
-
+        </div>
 
         <!-- KPI Cards Row -->
         <div class="row g-4 mb-5">
@@ -135,12 +131,11 @@
             </div>
         </div>
     </div>
-
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
-<!-- Plotting Logic -->
+    <!-- Plotting Logic -->
     <script>
         // Chart.js global defaults for sleek UI
         Chart.defaults.color = '#94a3b8';
@@ -157,26 +152,7 @@
 
         async function fetchAnalytics() {
             try {
-                const startDateValue = document.getElementById('startDateFilter').value;
-                const endDateValue = document.getElementById('endDateFilter').value;
-                let apiUrl = '/api/analytics';
-                
-                if (startDateValue && endDateValue) {
-                    apiUrl += `?start_date=${startDateValue}&end_date=${endDateValue}`;
-                    document.getElementById('pulseDot').style.display = 'none';
-                    document.getElementById('liveIndicator').style.background = 'rgba(139, 92, 246, 0.1)';
-                    document.getElementById('liveIndicator').style.borderColor = 'rgba(139, 92, 246, 0.2)';
-                    document.getElementById('liveIndicator').style.color = '#a78bfa';
-                    document.getElementById('indicatorText').innerText = 'Historical Period';
-                } else {
-                    document.getElementById('pulseDot').style.display = 'block';
-                    document.getElementById('liveIndicator').style.background = 'rgba(16, 185, 129, 0.1)';
-                    document.getElementById('liveIndicator').style.borderColor = 'rgba(16, 185, 129, 0.2)';
-                    document.getElementById('liveIndicator').style.color = '#10b981';
-                    document.getElementById('indicatorText').innerText = 'Live Data';
-                }
-
-                const response = await fetch(apiUrl);
+                const response = await fetch('/api/analytics');
                 const data = await response.json();
 
                 // Animate Numbers
@@ -311,10 +287,6 @@
         window.addEventListener('DOMContentLoaded', () => {
             fetchAnalytics();
             setInterval(fetchAnalytics, 15000);
-
-            // Re-fetch when date range changes
-            document.getElementById('startDateFilter').addEventListener('change', fetchAnalytics);
-            document.getElementById('endDateFilter').addEventListener('change', fetchAnalytics);
         });
     </script>
 {% endblock %}
