@@ -12,9 +12,13 @@
    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
    crossorigin="">
 </script>
-
+<!-- Addons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css">
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 <!-- Socket.io -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+
+
 
 <!-- Map style, make it fill the screen -->
 <style>
@@ -24,7 +28,14 @@
 
 {% block body %}
 {{ super() }}
-<div id="map"></div>
+<main class="row">
+  <div class="col" id="map">
+    <button id="refreshButton">
+        Button
+      </button>
+  </div>
+  <div class="col"></div>
+</main>
 {% endblock %}
 
 

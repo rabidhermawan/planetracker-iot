@@ -12,7 +12,7 @@ Web app that periodically fetches data from OpenSky API then display plane's loc
 0. Setup Redis for caching and (optionally) Postgre Database
 ```bash
 docker run -p 6379:6379 -d --name valkey-0 valkey/valkey-bundle
-docker run -p 5432:5432 -d --name postgres-0 -e POSTGRES_PASSWORD=12345 postgres
+docker run -p 5432:5432 -d --name postgres-0 -e POSTGRES_PASSWORD=yourpassword postgres
 ```
 
 1. Create a Python virtual environment, then enter the virtual environment
@@ -34,10 +34,14 @@ pip install -r requirements.txt
 3. Create the .flaskenv file from the provided .flaskenv.example, modify the env files as needed
 ```shell
 cp .flaskenv.example .flaskenv
+
+# If using Postgre database
+"postgresql://postgres:yourpassword@yourip:yourport/postgres
 ```
 
 3a. **ONLY RUN THIS WHEN MIGRATING NEW DATA**. Run the command below to migrate the database
 ```shell
+flask db migrate
 flask db upgrade
 ```
 
