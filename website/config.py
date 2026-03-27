@@ -52,6 +52,12 @@ class Config(object):
             "lomin": -1.0,
             "lamax": 52.5,
             "lomax": 1.5
+        },
+        "MALAYSIA_WEST":{
+            "lamin": 1.3746,
+            "lomin": 99.4529,
+            "lamax": 6.8199,
+            "lomax": 104.7384,
         }
     }
     

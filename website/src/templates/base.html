@@ -11,8 +11,8 @@
   <script src="{{ url_for('static', filename='js/color-modes.js') }}"></script>
   <link href="{{ url_for('static', filename='css/sidebars.css') }}" rel="stylesheet" />
 
-  <!-- SVG stuff -->
-  
+  <!-- Sidebar -->
+  <script src="{{ url_for('static', filename='js/sidebars.js') }}" class="astro-vvvwv3sm"></script>
   {% block head %}
   
   {% endblock %}
@@ -53,12 +53,9 @@
     </ul>
 
   </div>
-  <main class="flex-grow-1 overflow-auto vh-100">
+  <main class="flex-grow-1 overflow-auto vh-100 {% if request.path != url_for('live_map') %} py-4 {% endif %}">
     {% block body %}{% endblock %}
   </main>
-  
-
-  <script src="{{ url_for('static', filename='js/sidebars.js') }}" class="astro-vvvwv3sm"></script>
 </body>
 {% block scripts%}{% endblock %}
 

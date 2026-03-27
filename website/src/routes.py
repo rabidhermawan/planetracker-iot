@@ -28,7 +28,7 @@ def test_fetch_latest():
 
 @app.route('/live_map')
 def live_map():
-    return render_template('map_loadbroadcast.html', bounds=Config.MapBounds[Config.SELECTED_MAP_BOUNDS])
+    return render_template('live_map.html', bounds=Config.MapBounds[Config.SELECTED_MAP_BOUNDS])
 
 @app.route('/dashboard')
 def dashboard():

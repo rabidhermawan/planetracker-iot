@@ -35,6 +35,7 @@ def opensky_fetch_plane_data(area: str, token: OpenSkyTokenManager):
             states = plane_data.get("states") or []
             if not states:
                 print(f"No planes found in {area} at this time")
+                return None, None
             
             for data in states:
                 plane_db = db.session.query(Plane).filter_by(icao24=data[0]).first()
