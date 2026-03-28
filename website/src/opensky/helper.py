@@ -1,5 +1,7 @@
 import json
 
+import sqlalchemy as sa
+
 from src import app, db, redis_cache
 from src.models import Plane, PlaneData
 from .token_manager import OpenSkyTokenManager
@@ -22,12 +24,6 @@ def opensky_fetch_plane_data(area: str, token: OpenSkyTokenManager):
         # Only handles 200 OK
         if response.status_code == 200:
             plane_data = response.json()
-            # Cache data for future use. Wrapped in try-except to prevent crashes if Redis is dead
-            try:
-                redis_cache.json().set("latest_plane_data", "$" ,plane_data["states"])
-                redis_cache.expire("latest_plane_data", Config.API_FETCH_INTERVAL)
-            except Exception as e:
-                print(f"Redis cache warning: {e}")
             
             time_fetched = plane_data["time"]
             print(f"{datetime.now()} | Inserting plane data in {area} area to database")
@@ -77,10 +73,41 @@ def opensky_fetch_plane_data(area: str, token: OpenSkyTokenManager):
                 db.session.rollback()
                 print(f"DB ERROR During insert: {e}")
                 return None, None
-                        
+
+            # Cache data for future use. Wrapped in try-except to prevent crashes if Redis is dead
+            try:
+                
+                
+                airport_coor_points = opensky_query_landed_planes()
+                data_to_cache = {
+                    "current_airplane": plane_data["states"],
+                    "airport_points":  airport_coor_points
+                }
+                # print(data_to_cache)
+                
+                redis_cache.json().set("latest_plane_data", "$" , data_to_cache)
+                redis_cache.expire("latest_plane_data", Config.API_FETCH_INTERVAL)
+            except Exception as e:
+                print(f"Error : {e}")
+                
             print(f"{datetime.now()} | Successfully fetched and inserted {len(plane_data["states"])} plane data")
             
             return time_fetched, plane_data["states"]
         else:
             print(f"Failed to retrieve data, {response.status_code}")
             return None, None
+        
+def opensky_query_landed_planes():
+    stmt = sa.select(PlaneData.latitude, PlaneData.longitude).\
+        where(PlaneData.on_ground == True, 
+              PlaneData.latitude.is_not(None),
+              PlaneData.longitude.is_not(None)).\
+        group_by(PlaneData.latitude, PlaneData.longitude)
+
+    result = db.session.execute(stmt).all()
+    
+    heat_points = [[row.latitude, row.longitude] for row in result]
+    # print("heat points : ", heat_points)
+    return heat_points
+    
+    

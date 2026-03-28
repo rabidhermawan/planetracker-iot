@@ -13,19 +13,6 @@ from flask import redirect, url_for
 def index():
     return redirect(url_for('dashboard'))
 
-@app.route('/base')
-def base():
-    return render_template('base.html')
-
-@app.route('/map')
-def map():
-    return render_template('map.html')
-
-@app.route('/test_fetch')
-def test_fetch_latest():
-    _, plane_data = opensky_fetch_plane_data(Config.SELECTED_MAP_BOUNDS, token)
-    return render_template('map_loadjson.html', bounds=Config.MapBounds[Config.SELECTED_MAP_BOUNDS], plane_data=plane_data)
-
 @app.route('/live_map')
 def live_map():
     return render_template('live_map.html', bounds=Config.MapBounds[Config.SELECTED_MAP_BOUNDS])
@@ -217,7 +204,7 @@ def api_heatmap_data():
         except ValueError:
             return jsonify({"error": "Invalid date format. Expected YYYY-MM-DD"}), 400
     else:
-        # Fallback for "Live" mode (e.g., last 24 hours of flights)
+        # Query all 
         recent_threshold = datetime.utcnow() - timedelta(hours=24)
         stmt = stmt.where(PlaneData.time_fetched >= recent_threshold)
 

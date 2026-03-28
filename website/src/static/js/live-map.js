@@ -11,29 +11,24 @@ let planeIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" 
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
 
-    let plane_marker = []
+    
+    let plane_marker = L.layerGroup().addTo(map), airport_marker = L.layerGroup();
 
     // Get data from server for initialization
     let socket = io();
     
     socket.on('latest_data', function(plane_data) {
       plane_marker_amount = plane_marker.length;
-    
+      airport_marker_amount = airport_marker.length;
+      // Current Airplane
       // Remove existing marker
       if (plane_marker_amount> 0) {
-        for (let index = 0; index < plane_marker_amount; ++index){
-          const removed = plane_marker.pop()
-        
-          if (removed != undefined) {
-            map.removeLayer(removed)
-          }
-        }
+        plane_marker.clearLayers();
       }    
 
-      for (let index = 0; index < plane_data.length; ++index) {
-        const element = plane_data[index];
-        
-        console.log(element);
+      for (let index = 0; index < plane_data.current_airplane.length; ++index) {
+        const element = plane_data.current_airplane[index];
+        // console.log(element);
 
         let planeIcon = L.divIcon({
           html: planeIconSVG,
@@ -51,7 +46,7 @@ let planeIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" 
           asc_or_desc = `<span style="color: rgb(130, 130, 130)">Flat (${element[11]} m/s)</span>`
 
         }
-        let m = L.marker([element[6], element[5]], {icon: planeIcon, rotationAngle: parseFloat(element[10])}).addTo(map);
+        let m = L.marker([element[6], element[5]], {icon: planeIcon, rotationAngle: parseFloat(element[10])});
         m.bindTooltip(`
           <h2>${element[1]}</h2>
           <hr>
@@ -64,8 +59,37 @@ let planeIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" 
           <b>Speed:</b> ${element[9]} m/s<br>
           <b>On ground:</b> ${element[8]} <br>
         `);
-        plane_marker.push(m);
+        plane_marker.addLayer(m);
       }
+
+      // Airport Marker
+      // Remove existing marker
+      if (airport_marker_amount > 0) {
+        airport_marker.clearLayers();
+      }
+
+      heatmapLayer = L.heatLayer(plane_data.airport_points, {
+                        radius: 15,
+                        blur: 20,
+                        maxZoom: 10,
+                        gradient: {0.2: 'blue', 0.4: 'cyan', 0.6: 'lime', 0.8: 'yellow', 1.0: 'red'}
+                    }).addTo(airport_marker)
+
+      // for (let index = 0; index < plane_data.airport_points.length; ++index) {
+      //   let coordinate = plane_data.airport_points[index];
+      //   let m = L.marker([coordinate[0], coordinate[1]]).addTo(airport_marker);
+      //   plane_marker.addLayer(m);
+      // }
+
     });
+
+function toggleAirplaneVisibility() {
+  if (!map.hasLayer(airport_marker)) {
+    map.addLayer(airport_marker);
+  }
+  else {
+    map.removeLayer(airport_marker);
+  }
+}
 
     //velocity=data[9]

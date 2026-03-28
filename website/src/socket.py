@@ -1,7 +1,10 @@
 import json
 
-from src import Config, socketio, redis_cache, token 
+import sqlalchemy as sa
+
+from src import Config, socketio, redis_cache, token, db
 from src.opensky.helper import opensky_fetch_plane_data
+from src.models import PlaneData
 
 # Function used to fetch new data
 def opensky_broadcast_plane_data():
@@ -12,7 +15,7 @@ def opensky_broadcast_plane_data():
             socketio.emit("latest_data", latest_plane_data)
     except Exception as e:
         print(f"ERROR While getting the latest data: {e}")
-            
+    
 @socketio.on('connect')
 def handle_message():
     print(f'Connect : User connected, sending latest data')
@@ -22,7 +25,7 @@ def handle_message():
     if not latest_plane_data:
         print("Connect : Cache not found, fetch the data")
         opensky_fetch_plane_data(Config.SELECTED_MAP_BOUNDS, token)
-        latest_plane_data = latest_plane_data = redis_cache.json().get("latest_plane_data")
+        latest_plane_data = redis_cache.json().get("latest_plane_data")
 
         
     socketio.emit("latest_data", latest_plane_data)

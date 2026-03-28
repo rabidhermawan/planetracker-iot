@@ -13,7 +13,7 @@
    crossorigin="">
 </script>
 <!-- Addons -->
-<script src="{{ url_for('static', filename='js/leaflet/leaflet-heat.js') }}"></script>
+<script src="{{ url_for('static', filename='js/leaflet-heat.js') }}"></script>
 <script src="{{ url_for('static', filename='js/leaflet-rotatedMarker.js') }}"></script>
 
 <!-- Socket.io -->
@@ -47,7 +47,7 @@
 {% block body %}
 {{ super() }}
 <div id="map"></div>
-<button id="toggleAirplaneHeatmap" type="button">View Airplane Heatmap </button>
+<button id="toggleAirplaneHeatmap" type="button" onclick="toggleAirplaneVisibility()">View Airplane Heatmap </button>
 {% endblock %}
 
 {% block scripts %}
