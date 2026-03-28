@@ -27,7 +27,6 @@ token = OpenSkyTokenManager()
 # Establish socket
 socketio = SocketIO(app)
 from src import socket
-socketio.run(app)
 
 # Establish background scheduler
 scheduler = BackgroundScheduler()
