@@ -15,15 +15,15 @@ def index():
 
 @app.route('/live_map')
 def live_map():
-    return render_template('live_map.html', bounds=Config.MapBounds[Config.SELECTED_MAP_BOUNDS])
+    return render_template('live_map.html', title="Live Map", bounds=Config.MapBounds[Config.SELECTED_MAP_BOUNDS])
 
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', title="Dashboard")
 
 @app.route('/analysis')
 def analysis():
-    return render_template('analysis.html')
+    return render_template('analysis.html', title="Analysis")
 
 @app.route('/api/analytics')
 def analytics():
