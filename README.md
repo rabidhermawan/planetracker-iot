@@ -7,7 +7,7 @@ Web app that periodically fetches data from OpenSky API then display plane's loc
 - Detailed analytics
 
 ## How to run
-0. Setup Redis for caching and (optionally) Postgre Database
+0. Setup Redis for caching and (optionally) Postgre Database.
 ```bash
 docker run -p 6379:6379 -d --name valkey-0 valkey/valkey-bundle
 docker run -p 5432:5432 -d --name postgres-0 -e POSTGRES_PASSWORD=yourpassword postgres
@@ -29,7 +29,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-3. Create the .flaskenv file from the provided .flaskenv.example, modify the env files as needed
+3. Create the .flaskenv file from the provided .flaskenv.example, modify the env files as needed. If no database URL is provided, then SQLite will be used instead.
 ```shell
 cp .flaskenv.example .flaskenv
 
@@ -52,7 +52,7 @@ flask --debug --no-reload
 
 ## Software architecture
 1. **OpenSky API** : provides the data required for plane analysis
-2. **PostgreSQL** : used for storing the data of the planes fetched from OpenSky
+2. **PostgreSQL / SQLite** : used for storing the data of the planes fetched from OpenSky
 3. **Redis** : used for caching the latest plane data and airport data to reduce load when many users connect and provide seamless update to the Live Plane marker.
 4. **Flask & SQLAlchemy** :  building the backend and provide HTML templating
 5. **Bootstrap and Javascript** : Styling the website and also receive data from the Flask server and process incoming data before being displayed.
