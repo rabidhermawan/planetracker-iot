@@ -42,7 +42,7 @@ postgresql://postgres:yourpassword@yourip:yourport/postgres
 flask db upgrade
 ```
 
-3. Run the application. Currently it requires that you disable auto-reload/running more than one instance due to how APScheduler works.
+4. Run the application. Currently it requires that you disable auto-reload/running more than one instance due to how APScheduler works.
 ```shell
 flask run --no-reload
 
